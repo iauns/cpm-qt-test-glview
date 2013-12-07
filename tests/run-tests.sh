@@ -10,7 +10,8 @@ set -e
 
 pushd ./bin > /dev/null
   cmake ..
-  make -j4
+  make
+  echo "Running test (viewer)"
   ./glview_test
 popd
 

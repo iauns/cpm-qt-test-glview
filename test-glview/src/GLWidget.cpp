@@ -31,22 +31,27 @@
 
 #include <iostream>
 #include <QMouseEvent>
+#include <arc-look-at/ArcLookAt.hpp>
 
-#include "GLWidget.hpp"
+#include "GLWidget.h"
+
+namespace Spire = CPM_SPIRE_NS;
+
+namespace CPM_QT_GLVIEW_NS {
 
 //------------------------------------------------------------------------------
 GLWidget::GLWidget(GLCallback init, GLCallback update, const QGLFormat& format) :
     QGLWidget(format),
     mContext(new GLContext(this)),
-    mCallbackFunction(function),
+    mCallbackFunction(update),
     mArcLookAt(new CPM_LOOK_AT_NS::ArcLookAt)
 {
   std::vector<std::string> shaderSearchDirs;
   shaderSearchDirs.push_back("shaders");
 
   // Create an instance of spire and hook it up to a timer.
-  mSpire = std::shared_ptr<spire::Interface>(
-      new spire::Interface(mContext, shaderSearchDirs));
+  mSpire = std::shared_ptr<Spire::Interface>(
+      new Spire::Interface(mContext, shaderSearchDirs));
   mTimer = new QTimer(this);
   connect(mTimer, SIGNAL(timeout()), this, SLOT(updateRenderer()));
   mTimer->start(35);
@@ -84,9 +89,15 @@ void GLWidget::resizeGL(int width, int height)
   GL(glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height)));
 
   // Build the perspective matrix.
-  float aspect = static_cast<float>(mInterface.getScreenWidthPixels()) / 
-                 static_cast<float>(mInterface.getScreenHeightPixels());
+  float aspect = static_cast<float>(mScreenWidth) / 
+                 static_cast<float>(mScreenHeight);
   mPerspective = glm::perspective(getDefaultFOVY(), aspect, getDefaultZNear(), getDefaultZFar());
+}
+
+//------------------------------------------------------------------------------
+void GLWidget::initializeGL()
+{
+  
 }
 
 //------------------------------------------------------------------------------
@@ -105,13 +116,13 @@ void GLWidget::updateRenderer()
 }
 
 //------------------------------------------------------------------------------
-spire::V2 GLWidget::calculateScreenSpaceCoords(const glm::ivec2& mousePos)
+glm::vec2 GLWidget::calculateScreenSpaceCoords(const glm::ivec2& mousePos)
 {
   float windowOriginX = 0.0f;
   float windowOriginY = 0.0f;
 
   // Transform incoming mouse coordinates into screen space.
-  spire::V2 mouseScreenSpace;
+  glm::vec2 mouseScreenSpace;
   mouseScreenSpace.x = 2.0f * (static_cast<float>(mousePos.x) - windowOriginX) 
       / static_cast<float>(mScreenWidth) - 1.0f;
   mouseScreenSpace.y = 2.0f * (static_cast<float>(mousePos.y) - windowOriginY)
@@ -124,7 +135,7 @@ spire::V2 GLWidget::calculateScreenSpaceCoords(const glm::ivec2& mousePos)
 //------------------------------------------------------------------------------
 void GLWidget::mouseMoveEvent(QMouseEvent* event)
 {
-  glm::ivec2 screenSpace = glm::ivec3(event->x(), event->y());
+  glm::vec2 screenSpace = calculateScreenSpaceCoords(glm::ivec2(event->x(), event->y()));
   if (event->buttons() & Qt::LeftButton)
     mArcLookAt->doRotation(screenSpace);
   else if (event->buttons() & Qt::RightButton)
@@ -134,7 +145,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* event)
 //------------------------------------------------------------------------------
 void GLWidget::mousePressEvent(QMouseEvent* event)
 {
-  glm::ivec2 screenSpace = glm::ivec3(event->x(), event->y());
+  glm::vec2 screenSpace = calculateScreenSpaceCoords(glm::ivec2(event->x(), event->y()));
   mArcLookAt->doReferenceDown(screenSpace);
 }
 
@@ -149,4 +160,5 @@ void GLWidget::wheelEvent(QWheelEvent* event)
   mArcLookAt->doZoom(static_cast<float>(event->delta()) / 100.0f);
 }
 
+} // namespace CPM_QT_GLVIEW_NS
 

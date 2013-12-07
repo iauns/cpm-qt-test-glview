@@ -29,8 +29,9 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
-#include <math>
 #include <stdexcept>
+
+namespace CPM_QT_GLVIEW_NS {
 
 MainWindow::MainWindow(GLCallback init, GLCallback update, QWidget *parent) :
     QMainWindow(parent),
@@ -56,4 +57,6 @@ void MainWindow::closeEvent(QCloseEvent *evt)
 {
   QMainWindow::closeEvent(evt);
 }
+
+} // namespace CPM_QT_GLVIEW_NS
 

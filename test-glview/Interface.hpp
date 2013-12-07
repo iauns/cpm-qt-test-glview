@@ -29,11 +29,12 @@
 /// \author James Hughes
 /// \date   December 2013
 
-#ifndef INTERFACE_H
-#define INTERFACE_H
+#ifndef IAUNS_QT_GLVIEW_INTERFACE_H
+#define IAUNS_QT_GLVIEW_INTERFACE_H
 
 #include <memory>
 #include <functional>
+#include <spire/Interface.h>
 
 namespace CPM_QT_GLVIEW_NS {
 
@@ -50,7 +51,7 @@ typedef std::function<void (std::shared_ptr<CPM_SPIRE_NS::Interface> spire,
 /// A valid OpenGL context will be current when both 'init' and 'update' are
 /// called.
 /// Returns error code Qt returns.
-int buildGLView(GLCallback init, GLCallback update);
+int buildGLView(int argc, char** argv, GLCallback init, GLCallback update);
 
 } // namespace CPM_QT_GLVIEW_NS
 

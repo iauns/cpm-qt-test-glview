@@ -31,11 +31,11 @@
 
 #include <QtGui/QApplication>
 #include "Interface.hpp"
-#include "MainWindow.hpp"
+#include "src/MainWindow.h"
 
 namespace CPM_QT_GLVIEW_NS {
 
-int buildGLView(GLCallback init, GLCallback update);
+int buildGLView(int argc, char** argv, GLCallback init, GLCallback update)
 {
   QApplication a(argc, argv);
   MainWindow w(init, update);

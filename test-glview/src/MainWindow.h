@@ -35,7 +35,7 @@
 #include <QDialog>
 #include <QMainWindow>
 
-#include "GLWidget.hpp"
+#include "GLWidget.h"
 
 class MyGLFrame;
 

@@ -1,12 +1,3 @@
-cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
-project(qt-glviewer)
-
-#-----------------------------------------------------------------------
-# Configure OpenGL
-#-----------------------------------------------------------------------
-find_package(OpenGL REQUIRED)
-set(QT_USE_QTOPENGL TRUE)
-
 #-----------------------------------------------------------------------
 # Compiler settings (C++11)
 #-----------------------------------------------------------------------
@@ -71,7 +62,13 @@ CPM_AddModule("GLM"
   EXPORT_MODULE TRUE    # Use EXPORT_MODULE sparingly. We expose GLM's interface
   )                     # through our own interface hence why we export it.
 
-CPM_Finish()
+CPM_InitModule(${CPM_MODULE_NAME})
+
+#-----------------------------------------------------------------------
+# Configure OpenGL
+#-----------------------------------------------------------------------
+find_package(OpenGL REQUIRED)
+set(QT_USE_QTOPENGL TRUE)
 
 #-----------------------------------------------------------------------
 # Compiler settings
@@ -108,8 +105,8 @@ file (GLOB Sources
   "test-glview/src/*.hpp"
   )
 
-set(MocHeaders MainWindow.h GLWidget.h)
-set(Forms MainWindow.ui)
+set(MocHeaders test-glview/src/MainWindow.h test-glview/src/GLWidget.h)
+set(Forms test-glview/src/MainWindow.ui)
 
 QT4_WRAP_CPP(MocSource ${MocHeaders})
 QT4_WRAP_UI(UISource ${Forms})
@@ -118,13 +115,9 @@ QT4_WRAP_UI(UISource ${Forms})
 # Setup executable
 #-----------------------------------------------------------------------
 
-add_executable(spireview 
-  ${Sources}
-  ${MocSource} 
-  ${UISource})
-
-target_link_libraries(spireview 
-  ${CPM_LIBRARIES} 
+add_library(${CPM_LIB_TARGET_NAME} ${Sources} ${MocSource} ${UISource})
+target_link_libraries(${CPM_LIB_TARGET_NAME}
+  ${CPM_LIBRARIES}
   ${QT_OPENGL_LIBRARY}
   ${OPENGL_LIBRARIES}
   ${QT_LIBRARIES})

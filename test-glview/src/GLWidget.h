@@ -29,8 +29,8 @@
 /// \author James Hughes
 /// \date   September 2012
 
-#ifndef IAUNS_SPIRE_GLWIDGET_H
-#define IAUNS_SPIRE_GLWIDGET_H
+#ifndef IAUNS_QT_GLVIEW_GLWIDGET_H
+#define IAUNS_QT_GLVIEW_GLWIDGET_H
 
 #define NOMINMAX
 
@@ -38,9 +38,10 @@
 
 #include "../Interface.hpp"
 #include "GLContext.hpp"
-#include "namespaces.h"
 
 #include <spire/Interface.h>
+
+#include <glm/gtc/constants.hpp>
 
 namespace CPM_LOOK_AT_NS {
   class ArcLookAt;
@@ -53,12 +54,12 @@ class GLWidget : public QGLWidget
   Q_OBJECT
 
 public:
-  GLWidget(GLUpdateFunction function, const QGLFormat& format);
+  GLWidget(GLCallback init, GLCallback update, const QGLFormat& format);
   ~GLWidget();
 
-  constexpr float getDefaultFOVY()   {return 32.0f * (spire::PI / 180.0f);}
-  constexpr float getDefaultZNear()  {return 0.1f;}
-  constexpr float getDefaultZFar()   {return 1350.0f;}
+  static float getDefaultFOVY()   {return 32.0f * (glm::pi<float>() / 180.0f);}
+  static float getDefaultZNear()  {return 0.1f;}
+  static float getDefaultZFar()   {return 1350.0f;}
 
 protected:
   virtual void initializeGL();
@@ -74,19 +75,21 @@ protected slots:
 
 private:
 
+  glm::vec2 calculateScreenSpaceCoords(const glm::ivec2& mousePos);
+
   int    mScreenWidth;    ///< Screen width in pixels.
   int    mScreenHeight;   ///< Screen height in pixels.
 
   glm::mat4 mPerspective; ///< Perspective matrix.
 
-  std::shared_ptr<spire::Interface>           mSpire;
+  std::shared_ptr<CPM_SPIRE_NS::Interface>    mSpire;
   std::shared_ptr<GLContext>                  mContext;
-  GLUpdateFunction                            mCallbackFunction;
+  GLCallback                                  mCallbackFunction;
   QTimer*                                     mTimer;
 
-  std::unique_ptr<CPM_LOOK_AT_NS::ArcLookAt>  mArcLookAt;
+  std::shared_ptr<CPM_LOOK_AT_NS::ArcLookAt>  mArcLookAt;
 };
 
-// namespace CPM_QT_GLVIEW_NS
+} // namespace CPM_QT_GLVIEW_NS
 
 #endif // SPIRE_GLWIDGET_H
