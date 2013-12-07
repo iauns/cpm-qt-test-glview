@@ -32,6 +32,7 @@
 // For windows.
 #define NOMINMAX
 
+#include <QtGui>
 #include <QMainWindow>
 #include <QDialog>
 
