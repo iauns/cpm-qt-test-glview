@@ -50,7 +50,7 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 
 public:
-  explicit MainWindow(GLUpdateFunction function, QWidget *parent = 0);
+  explicit MainWindow(GLCallback init, GLCallback update, QWidget *parent = 0);
   ~MainWindow();
 
 protected:

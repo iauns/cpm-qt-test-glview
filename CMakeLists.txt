@@ -54,13 +54,22 @@ endif()
 # ++ MODULE: Arc ball look-at camera
 CPM_AddModule("look_at"
   GIT_REPOSITORY "https://github.com/iauns/cpm-arc-look-at"
-  GIT_TAG "origin/master")
+  GIT_TAG "origin/master"
+  FORWARD_DECLARATION TRUE)
 
 # ++ MODULE: Spire
 CPM_AddModule("spire"
   GIT_REPOSITORY "https://github.com/SCIInstitute/spire"
   GIT_TAG "origin/master"
   EXPORT_MODULE TRUE)
+
+# ++ MODULE: GLM
+CPM_AddModule("GLM"
+  GIT_REPOSITORY "https://github.com/iauns/cpm-glm"
+  GIT_TAG "origin/master"
+  USE_EXISTING_VER TRUE
+  EXPORT_MODULE TRUE    # Use EXPORT_MODULE sparingly. We expose GLM's interface
+  )                     # through our own interface hence why we export it.
 
 CPM_Finish()
 

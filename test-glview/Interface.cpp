@@ -35,10 +35,10 @@
 
 namespace CPM_QT_GLVIEW_NS {
 
-void buildGLView(GLUpdateFunction function)
+int buildGLView(GLCallback init, GLCallback update);
 {
   QApplication a(argc, argv);
-  MainWindow w;
+  MainWindow w(init, update);
   w.show();
 
   return a.exec();

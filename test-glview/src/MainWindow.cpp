@@ -29,10 +29,10 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
-#include <math.h>
+#include <math>
 #include <stdexcept>
 
-MainWindow::MainWindow(GLUpdateFunction function, QWidget *parent) :
+MainWindow::MainWindow(GLCallback init, GLCallback update, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
@@ -42,7 +42,7 @@ MainWindow::MainWindow(GLUpdateFunction function, QWidget *parent) :
   QGLFormat fmt;
   fmt.setAlpha(true);
   fmt.setRgba(true);
-  mGLWidget = new GLWidget(function, fmt);
+  mGLWidget = new GLWidget(init, update, fmt);
 
   setCentralWidget(mGLWidget);
 }

@@ -29,8 +29,8 @@
 /// \author James Hughes
 /// \date   September 2012
 
-#ifndef SPIRE_GLWIDGET_H
-#define SPIRE_GLWIDGET_H
+#ifndef IAUNS_SPIRE_GLWIDGET_H
+#define IAUNS_SPIRE_GLWIDGET_H
 
 #define NOMINMAX
 
@@ -38,7 +38,13 @@
 
 #include "../Interface.hpp"
 #include "GLContext.hpp"
+#include "namespaces.h"
+
 #include <spire/Interface.h>
+
+namespace CPM_LOOK_AT_NS {
+  class ArcLookAt;
+}
 
 namespace CPM_QT_GLVIEW_NS {
 
@@ -48,23 +54,37 @@ class GLWidget : public QGLWidget
 
 public:
   GLWidget(GLUpdateFunction function, const QGLFormat& format);
+  ~GLWidget();
+
+  constexpr float getDefaultFOVY()   {return 32.0f * (spire::PI / 180.0f);}
+  constexpr float getDefaultZNear()  {return 0.1f;}
+  constexpr float getDefaultZFar()   {return 1350.0f;}
 
 protected:
-  void resizeEvent(QResizeEvent *evt);
-  void closeEvent(QCloseEvent *evt);
+  virtual void initializeGL();
+  virtual void resizeGL(int width, int height);
   virtual void mousePressEvent(QMouseEvent* event);
   virtual void mouseMoveEvent(QMouseEvent* event);
   virtual void mouseReleaseEvent(QMouseEvent* event);
+  virtual void wheelEvent(QWheelEvent* event);
+  void closeEvent(QCloseEvent *evt);
 
 protected slots:
   void updateRenderer();
 
 private:
 
-  std::shared_ptr<GLContext>            mContext;
-  std::shared_ptr<spire::Interface>     mSpire;
-  QTimer*                               mTimer;
-  GLUpdateFunction                      mCallbackFunction;
+  int    mScreenWidth;    ///< Screen width in pixels.
+  int    mScreenHeight;   ///< Screen height in pixels.
+
+  glm::mat4 mPerspective; ///< Perspective matrix.
+
+  std::shared_ptr<spire::Interface>           mSpire;
+  std::shared_ptr<GLContext>                  mContext;
+  GLUpdateFunction                            mCallbackFunction;
+  QTimer*                                     mTimer;
+
+  std::unique_ptr<CPM_LOOK_AT_NS::ArcLookAt>  mArcLookAt;
 };
 
 // namespace CPM_QT_GLVIEW_NS

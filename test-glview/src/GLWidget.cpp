@@ -34,19 +34,12 @@
 
 #include "GLWidget.hpp"
 
-#include "namespaces.h"
-
-using namespace spire;
-using spire::V4;
-using spire::V3;
-using spire::V2;
-using spire::M44;
-
 //------------------------------------------------------------------------------
-GLWidget::GLWidget(GLUpdateFunction function, const QGLFormat& format) :
+GLWidget::GLWidget(GLCallback init, GLCallback update, const QGLFormat& format) :
     QGLWidget(format),
     mContext(new GLContext(this)),
-    mCallbackFunction(function)
+    mCallbackFunction(function),
+    mArcLookAt(new CPM_LOOK_AT_NS::ArcLookAt)
 {
   std::vector<std::string> shaderSearchDirs;
   shaderSearchDirs.push_back("shaders");
@@ -58,23 +51,42 @@ GLWidget::GLWidget(GLUpdateFunction function, const QGLFormat& format) :
   connect(mTimer, SIGNAL(timeout()), this, SLOT(updateRenderer()));
   mTimer->start(35);
 
+  // Let the client initialize their graphics code.
+  init(mSpire, glm::mat4(), mPerspective);
+
   // We must disable auto buffer swap on the 'paintEvent'.
   setAutoBufferSwap(false);
 }
 
 //------------------------------------------------------------------------------
-void GLWidget::resizeEvent(QResizeEvent*)
+GLWidget::~GLWidget()
 {
-  /// @todo Inform the renderer that screen dimensions have changed.
-  //mSpire.resizeViewport(evt->size());
+  if (mSpire != nullptr)
+  {
+    mSpire.reset();
+  }
 }
 
 //------------------------------------------------------------------------------
 void GLWidget::closeEvent(QCloseEvent *evt)
 {
-  // Kill off the graphics thread.
-  mSpire.reset();
+  if (mSpire != nullptr)
+  {
+    mSpire.reset();
+  }
   QGLWidget::closeEvent(evt);
+}
+
+//------------------------------------------------------------------------------
+void GLWidget::resizeGL(int width, int height)
+{
+  mSpire->makeCurrent();
+  GL(glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height)));
+
+  // Build the perspective matrix.
+  float aspect = static_cast<float>(mInterface.getScreenWidthPixels()) / 
+                 static_cast<float>(mInterface.getScreenHeightPixels());
+  mPerspective = glm::perspective(getDefaultFOVY(), aspect, getDefaultZNear(), getDefaultZFar());
 }
 
 //------------------------------------------------------------------------------
@@ -89,38 +101,41 @@ void GLWidget::updateRenderer()
     return;
 
   if (mCallbackFunction)
-    mCallbackFunction(mSpire);
+    mCallbackFunction(mSpire, mArcLookAt->getWorldViewTransform(), mPerspective);
+}
+
+//------------------------------------------------------------------------------
+spire::V2 GLWidget::calculateScreenSpaceCoords(const glm::ivec2& mousePos)
+{
+  float windowOriginX = 0.0f;
+  float windowOriginY = 0.0f;
+
+  // Transform incoming mouse coordinates into screen space.
+  spire::V2 mouseScreenSpace;
+  mouseScreenSpace.x = 2.0f * (static_cast<float>(mousePos.x) - windowOriginX) 
+      / static_cast<float>(mScreenWidth) - 1.0f;
+  mouseScreenSpace.y = 2.0f * (static_cast<float>(mousePos.y) - windowOriginY)
+      / static_cast<float>(mScreenHeight) - 1.0f;
+  mouseScreenSpace.y = -mouseScreenSpace.y;
+
+  return mouseScreenSpace;
 }
 
 //------------------------------------------------------------------------------
 void GLWidget::mouseMoveEvent(QMouseEvent* event)
 {
-  glm::ivec2 thisPos;
-  thisPos.x = event->x();
-  thisPos.y = event->y();
-
-  glm::ivec2 delta = thisPos - mLastMousePos;
-
-  // Apply this rotation extremelly naively to the camera.
-  // divisor is a magic calibration number from pixels to rotation speed.
-  const float divisor = 32.0f;
-  float rx = static_cast<float>(-delta.y) / divisor;
-  float ry = static_cast<float>(delta.x) / divisor;
-
-  M44 tx = glm::rotate(M44(), rx, V3(1.0, 0.0, 0.0));
-  M44 ty = glm::rotate(M44(), ry, V3(0.0, 1.0, 0.0));
-
-  // x applied first in object space, then y.
-  mCamWorld = mCamWorld * ty * tx;
-
-  mLastMousePos = thisPos;
+  glm::ivec2 screenSpace = glm::ivec3(event->x(), event->y());
+  if (event->buttons() & Qt::LeftButton)
+    mArcLookAt->doRotation(screenSpace);
+  else if (event->buttons() & Qt::RightButton)
+    mArcLookAt->doPan(screenSpace);
 }
 
 //------------------------------------------------------------------------------
 void GLWidget::mousePressEvent(QMouseEvent* event)
 {
-  mLastMousePos.x = event->x();
-  mLastMousePos.y = event->y();
+  glm::ivec2 screenSpace = glm::ivec3(event->x(), event->y());
+  mArcLookAt->doReferenceDown(screenSpace);
 }
 
 //------------------------------------------------------------------------------
@@ -128,5 +143,10 @@ void GLWidget::mouseReleaseEvent(QMouseEvent*)
 {
 }
 
+//------------------------------------------------------------------------------
+void GLWidget::wheelEvent(QWheelEvent* event)
+{
+  mArcLookAt->doZoom(static_cast<float>(event->delta()) / 100.0f);
+}
 
 

@@ -37,12 +37,20 @@
 
 namespace CPM_QT_GLVIEW_NS {
 
-typedef std::function<void (std::shared_ptr<CPM_SPIRE_NS::Interface> spire, float dt)> GLUpdateFunction;
+/// Function callback that will be issued on initialization and on update.
+/// Both 'view' and 'perspective' will be identity matrices when called at
+/// initialization. Both will be valid when update is issued.
+typedef std::function<void (std::shared_ptr<CPM_SPIRE_NS::Interface> spire, 
+                            const glm::mat4& view, const glm::mat4& perspective)> GLCallback;
 
 /// Blocking function. Constructs and runs an OpenGL window alongside a spire
-/// instance. 20 times a second the UI thread will call \p function with a valid
-/// GL context bound. Issue any spire calls or OpenGL calls in this callback.
-void buildGLView(GLUpdateFunction function);
+/// instance. This function will call \p update @ 20 hertz. Issue any spire
+/// calls or OpenGL calls in this callback. Additionally, \p init will be 
+/// issued once when spire is initialized for the first time.
+/// A valid OpenGL context will be current when both 'init' and 'update' are
+/// called.
+/// Returns error code Qt returns.
+int buildGLView(GLCallback init, GLCallback update);
 
 } // namespace CPM_QT_GLVIEW_NS
 
