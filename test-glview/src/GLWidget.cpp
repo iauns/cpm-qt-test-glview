@@ -88,6 +88,9 @@ void GLWidget::resizeGL(int width, int height)
   mSpire->makeCurrent();
   GL(glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height)));
 
+  mScreenWidth = width;
+  mScreenHeight = height;
+
   // Build the perspective matrix.
   float aspect = static_cast<float>(mScreenWidth) / 
                  static_cast<float>(mScreenHeight);
@@ -103,7 +106,7 @@ void GLWidget::initializeGL()
 //------------------------------------------------------------------------------
 void GLWidget::updateRenderer()
 {
-  mContext->makeCurrent();    // Required on windows...
+  mContext->makeCurrent();
 
   // Do not even attempt to render if the framebuffer is not complete.
   // This can happen when the rendering window is hidden (in SCIRun5 for
@@ -113,6 +116,8 @@ void GLWidget::updateRenderer()
 
   if (mCallbackFunction)
     mCallbackFunction(mSpire, mArcLookAt->getWorldViewTransform(), mPerspective);
+
+  mContext->swapBuffers();
 }
 
 //------------------------------------------------------------------------------
