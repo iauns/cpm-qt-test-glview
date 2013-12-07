@@ -11,7 +11,9 @@ set -e
 pushd ./bin > /dev/null
   cmake ..
   make
-  echo "Running test (viewer)"
-  ./glview_test
+  # We only test the build on Travis. There aren't any tests that we run
+  # yet.
+  #echo "Running test (viewer)"
+  #./glview_test
 popd
 
