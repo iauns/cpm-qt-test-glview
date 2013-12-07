@@ -3,10 +3,10 @@
 
    The MIT License
 
-   Copyright (c) 2012 Scientific Computing and Imaging Institute,
+   Copyright (c) 2013 Scientific Computing and Imaging Institute,
    University of Utah.
 
-   License for the specific language governing rights and limitations under
+
    Permission is hereby granted, free of charge, to any person obtaining a
    copy of this software and associated documentation files (the "Software"),
    to deal in the Software without restriction, including without limitation
@@ -27,48 +27,22 @@
 */
 
 /// \author James Hughes
-/// \date   September 2012
+/// \date   December 2013
 
-#ifndef SPIRE_GLWIDGET_H
-#define SPIRE_GLWIDGET_H
+#include <QtGui/QApplication>
+#include "Interface.hpp"
+#include "MainWindow.hpp"
 
-#define NOMINMAX
+namespace CPM_QT_GLVIEW_NS {
 
-#include <QTimer>
-
-#include "namespaces.h"
-#include "GLContext.h"
-#include "spire/Interface.h"
-
-class GLWidget : public QGLWidget
+void buildGLView(GLUpdateFunction function)
 {
-  Q_OBJECT
+  QApplication a(argc, argv);
+  MainWindow w;
+  w.show();
 
-public:
-  GLWidget(const QGLFormat& format);
+  return a.exec();
+}
 
-protected:
-  void resizeEvent(QResizeEvent *evt);
-  void closeEvent(QCloseEvent *evt);
-  virtual void mousePressEvent(QMouseEvent* event);
-  virtual void mouseMoveEvent(QMouseEvent* event);
-  virtual void mouseReleaseEvent(QMouseEvent* event);
+} // namespace CPM_QT_GLVIEW_NS
 
-  void buildScene();
-
-protected slots:
-  void updateRenderer();
-
-private:
-
-  std::shared_ptr<GLContext>            mContext;
-  std::shared_ptr<spire::Interface>     mSpire;
-  glm::ivec2                            mLastMousePos;
-  spire::M44                            mCamWorld;
-  QTimer*                               mTimer;
-
-  std::string                           mObject1;
-};
-
-
-#endif // SPIRE_GLWIDGET_H

@@ -26,21 +26,34 @@
    DEALINGS IN THE SOFTWARE.
 */
 
-#include <QtGui/QApplication>
 #include "MainWindow.h"
-#if defined(SPIRE_USING_LINUX)
-#include <X11/Xlib.h>
-#endif
+#include "ui_MainWindow.h"
 
-int main(int argc, char *argv[])
+#include <math.h>
+#include <stdexcept>
+
+MainWindow::MainWindow(GLUpdateFunction function, QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
 {
-#if defined(SPIRE_USING_LINUX)
-  XInitThreads();
-#endif
+  ui->setupUi(this);
 
-  QApplication a(argc, argv);
-  MainWindow w;
-  w.show();
+  // Setup Qt OpenGL widget.
+  QGLFormat fmt;
+  fmt.setAlpha(true);
+  fmt.setRgba(true);
+  mGLWidget = new GLWidget(function, fmt);
 
-  return a.exec();
+  setCentralWidget(mGLWidget);
 }
+
+MainWindow::~MainWindow()
+{
+  delete ui;
+}
+
+void MainWindow::closeEvent(QCloseEvent *evt)
+{
+  QMainWindow::closeEvent(evt);
+}
+

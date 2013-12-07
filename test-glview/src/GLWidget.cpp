@@ -32,7 +32,7 @@
 #include <iostream>
 #include <QMouseEvent>
 
-#include "GLWidget.h"
+#include "GLWidget.hpp"
 
 #include "namespaces.h"
 
@@ -43,12 +43,13 @@ using spire::V2;
 using spire::M44;
 
 //------------------------------------------------------------------------------
-GLWidget::GLWidget(const QGLFormat& format) :
+GLWidget::GLWidget(GLUpdateFunction function, const QGLFormat& format) :
     QGLWidget(format),
-    mContext(new GLContext(this))
+    mContext(new GLContext(this)),
+    mCallbackFunction(function)
 {
   std::vector<std::string> shaderSearchDirs;
-  shaderSearchDirs.push_back("Shaders");
+  shaderSearchDirs.push_back("shaders");
 
   // Create an instance of spire and hook it up to a timer.
   mSpire = std::shared_ptr<spire::Interface>(
@@ -57,84 +58,8 @@ GLWidget::GLWidget(const QGLFormat& format) :
   connect(mTimer, SIGNAL(timeout()), this, SLOT(updateRenderer()));
   mTimer->start(35);
 
-  buildScene();
-
   // We must disable auto buffer swap on the 'paintEvent'.
   setAutoBufferSwap(false);
-}
-
-//------------------------------------------------------------------------------
-void GLWidget::buildScene()
-{
-  // Add shader attributes that we will be using.
-  mSpire->addShaderAttribute("aPos",         3,  false,  sizeof(float) * 3,  spire::Interface::TYPE_FLOAT);
-  mSpire->addShaderAttribute("aNormal",      3,  false,  sizeof(float) * 3,  spire::Interface::TYPE_FLOAT);
-  mSpire->addShaderAttribute("aColorFloat",  4,  false,  sizeof(float) * 4,  spire::Interface::TYPE_FLOAT);
-  mSpire->addShaderAttribute("aColor",       4,  true,   sizeof(char) * 4,   spire::Interface::TYPE_UBYTE);
-
-  // Simple plane -- complex method of transfering to spire.
-  std::vector<float> vboData;
-  vboData.push_back(-1.0f); vboData.push_back( 1.0f); vboData.push_back(-5.0f);
-  vboData.push_back( 1.0f); vboData.push_back( 1.0f); vboData.push_back(-5.0f);
-  vboData.push_back(-1.0f); vboData.push_back(-1.0f); vboData.push_back(-5.0f);
-  vboData.push_back( 1.0f); vboData.push_back(-1.0f); vboData.push_back(-5.0f);
-  std::vector<std::string> attribNames;
-  attribNames.push_back("aPos");
-
-  std::vector<uint16_t> iboData;
-  iboData.push_back(0);
-  iboData.push_back(1);
-  iboData.push_back(2);
-  iboData.push_back(3);
-  spire::Interface::IBO_TYPE iboType = spire::Interface::IBO_16BIT;
-  
-  uint8_t*  rawBegin;
-  size_t    rawSize;
-
-  // Copy vboData into vector of uint8_t. Using std::copy.
-  std::shared_ptr<std::vector<uint8_t>> rawVBO(new std::vector<uint8_t>());
-  rawSize = vboData.size() * (sizeof(float) / sizeof(uint8_t));
-  rawVBO->reserve(rawSize);
-  rawBegin = reinterpret_cast<uint8_t*>(&vboData[0]); // Remember, standard guarantees that vectors are contiguous in memory.
-  rawVBO->assign(rawBegin, rawBegin + rawSize);
-
-  // Copy iboData into vector of uint8_t. Using std::vector::assign.
-  std::shared_ptr<std::vector<uint8_t>> rawIBO(new std::vector<uint8_t>());
-  rawSize = iboData.size() * (sizeof(uint16_t) / sizeof(uint8_t));
-  rawIBO->reserve(rawSize);
-  rawBegin = reinterpret_cast<uint8_t*>(&iboData[0]); // Remember, standard guarantees that vectors are contiguous in memory.
-  rawIBO->assign(rawBegin, rawBegin + rawSize);
-
-  // Add necessary VBO's and IBO's
-  std::string vbo1 = "vbo1";
-  std::string ibo1 = "ibo1";
-  mSpire->addVBO(vbo1, rawVBO, attribNames);
-  mSpire->addIBO(ibo1, rawIBO, iboType);
-
-  // Add object
-  mObject1 = "obj1";
-  mSpire->addObject(mObject1);
-
-  // Ensure shader is resident.
-  std::string shader1 = "UniformColor";
-  std::vector<std::tuple<std::string, spire::Interface::SHADER_TYPES>> shaderFiles;
-  shaderFiles.push_back(std::make_pair("UniformColor.vsh", spire::Interface::VERTEX_SHADER));
-  shaderFiles.push_back(std::make_pair("UniformColor.fsh", spire::Interface::FRAGMENT_SHADER));
-
-  mSpire->addPersistentShader(shader1, shaderFiles);
-
-  // Build the pass (default pass).
-  mSpire->addPassToObject(mObject1, shader1, vbo1, ibo1, spire::Interface::TRIANGLE_STRIP);
-
-  M44 xform;
-  xform[3] = V4(0.0f, 0.0f, 0.0f, 1.0f);
-  mSpire->addObjectPassUniform(mObject1, "uColor", V4(1.0f, 0.0f, 0.0f, 1.0f));
-
-  // Setup simple camera
-  M44 proj = glm::perspective(32.0f * (spire::PI / 180.0f), 3.0f/2.0f, 0.1f, 1350.0f);
-  mSpire->addGlobalUniform("uProjIV", proj);
-
-  mSpire->addObjectGlobalUniform(mObject1, "uProjIVObject", proj * xform);
 }
 
 //------------------------------------------------------------------------------
@@ -163,19 +88,8 @@ void GLWidget::updateRenderer()
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     return;
 
-  /// \todo Move this outside of the interface!
-  GL(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
-  GL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
-
-  /// \todo Make line width a part of the GPU state.
-  glLineWidth(2.0f);
-  //glEnable(GL_LINE_SMOOTH);
-
-  GPUState defaultGPUState;
-  mSpire->applyGPUState(defaultGPUState, true); // true = force application of state.
-
-  mSpire->renderObject(mObject1);
-  mContext->swapBuffers();
+  if (mCallbackFunction)
+    mCallbackFunction(mSpire);
 }
 
 //------------------------------------------------------------------------------

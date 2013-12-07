@@ -3,10 +3,10 @@
 
    The MIT License
 
-   Copyright (c) 2012 Scientific Computing and Imaging Institute,
+   Copyright (c) 2013 Scientific Computing and Imaging Institute,
    University of Utah.
 
-   License for the specific language governing rights and limitations under
+
    Permission is hereby granted, free of charge, to any person obtaining a
    copy of this software and associated documentation files (the "Software"),
    to deal in the Software without restriction, including without limitation
@@ -26,37 +26,24 @@
    DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef TOOLS_VIEW_MAINWINDOW_H
-#define TOOLS_VIEW_MAINWINDOW_H
+/// \author James Hughes
+/// \date   December 2013
 
-// For windows.
-#define NOMINMAX
+#ifndef INTERFACE_H
+#define INTERFACE_H
 
-#include <QDialog>
-#include <QMainWindow>
+#include <memory>
+#include <functional>
 
-#include "GLWidget.h"
+namespace CPM_QT_GLVIEW_NS {
 
-class MyGLFrame;
+typedef std::function<void (std::shared_ptr<CPM_SPIRE_NS::Interface> spire, float dt)> GLUpdateFunction;
 
-namespace Ui {
-class MainWindow;
-}
+/// Blocking function. Constructs and runs an OpenGL window alongside a spire
+/// instance. 20 times a second the UI thread will call \p function with a valid
+/// GL context bound. Issue any spire calls or OpenGL calls in this callback.
+void buildGLView(GLUpdateFunction function);
 
-class MainWindow : public QMainWindow
-{
-  Q_OBJECT
+} // namespace CPM_QT_GLVIEW_NS
 
-public:
-  explicit MainWindow(QWidget *parent = 0);
-  ~MainWindow();
-
-protected:
-  void closeEvent(QCloseEvent *evt);
-
-private:
-  Ui::MainWindow*     ui;
-  GLWidget*           mGLWidget;
-};
-
-#endif // TOOLS_VIEW_MAINWINDOW_H
+#endif 

@@ -29,7 +29,7 @@
 /// \author James Hughes
 /// \date   December 2012
 
-#include "GLContext.h"
+#include "GLContext.hpp"
 
 GLContext::GLContext(QGLWidget* glWidget) :
     mGLWidget(glWidget)
