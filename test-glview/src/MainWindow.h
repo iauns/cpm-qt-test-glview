@@ -32,8 +32,8 @@
 // For windows.
 #define NOMINMAX
 
-#include <QDialog>
 #include <QMainWindow>
+#include <QDialog>
 
 #include "GLWidget.h"
 
