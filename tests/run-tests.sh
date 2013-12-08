@@ -13,7 +13,7 @@ pushd ./bin > /dev/null
   make
   # We only test the build on Travis. There aren't any tests that we run
   # yet.
-  echo "Running test (viewer)"
-  ./glview_test
+  #echo "Running test (viewer)"
+  #./glview_test
 popd
 

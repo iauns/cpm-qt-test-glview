@@ -75,14 +75,12 @@ void init(std::shared_ptr<Spire::Interface> spire,
   glm::mat4 xform;
   xform[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
   spire->addObjectPassUniform(objectName, "uColor", glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-
 }
 
 void update(std::shared_ptr<Spire::Interface> spire,
             const glm::mat4& view, const glm::mat4& perspective)
 {
   glm::mat4 inverseView = glm::affineInverse(view);
-  Spire::printM44(inverseView);
 
   // Render the scene. We will need to be sure and clear the screen first.
   GL(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
@@ -91,7 +89,6 @@ void update(std::shared_ptr<Spire::Interface> spire,
   Spire::GPUState defaultGPUState;
   spire->applyGPUState(defaultGPUState, true); // true = force application of state.
 
-  // Setup simple camera
   spire->addGlobalUniform("uProjIV", perspective);
   spire->addObjectGlobalUniform(objectName, "uProjIVObject", perspective * inverseView);
 
