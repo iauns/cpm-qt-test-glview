@@ -9,7 +9,7 @@ fi
 set -e
 
 pushd ./bin > /dev/null
-  cmake -DCMAKE_BUILD_TYPE=Debug ..
+  cmake -DCMAKE_BUILD_TYPE=Debug -DCPM_SHOW_HIERARCHY=TRUE ..
   make
   # We only test the build on Travis. There aren't any tests that we run
   # yet.
