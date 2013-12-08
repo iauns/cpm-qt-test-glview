@@ -40,7 +40,7 @@
 #include "GLContext.hpp"
 
 #include <spire/Interface.h>
-
+#include <glm-aabb/AABB.hpp>
 #include <glm/gtc/constants.hpp>
 
 namespace CPM_LOOK_AT_NS {
@@ -54,7 +54,9 @@ class GLWidget : public QGLWidget
   Q_OBJECT
 
 public:
-  GLWidget(GLCallback init, GLCallback update, const QGLFormat& format);
+  GLWidget(GLCallback init, GLCallback update,
+           CPM_GLM_AABB_NS::AABB sceneExtents,
+           const QGLFormat& format);
   ~GLWidget();
 
   static float getDefaultFOVY()   {return 32.0f * (glm::pi<float>() / 180.0f);}
@@ -68,6 +70,7 @@ protected:
   virtual void mouseMoveEvent(QMouseEvent* event);
   virtual void mouseReleaseEvent(QMouseEvent* event);
   virtual void wheelEvent(QWheelEvent* event);
+  virtual void keyPressEvent(QKeyEvent* event);
   void closeEvent(QCloseEvent *evt);
 
 protected slots:
@@ -86,6 +89,7 @@ private:
   std::shared_ptr<GLContext>                  mContext;
   GLCallback                                  mCallbackFunction;
   QTimer*                                     mTimer;
+  CPM_GLM_AABB_NS::AABB                       mSceneExtents;
 
   std::shared_ptr<CPM_LOOK_AT_NS::ArcLookAt>  mArcLookAt;
 };

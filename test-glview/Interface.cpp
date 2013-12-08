@@ -35,10 +35,11 @@
 
 namespace CPM_QT_GLVIEW_NS {
 
-int buildGLView(int argc, char** argv, GLCallback init, GLCallback update)
+int buildGLView(int argc, char** argv, GLCallback init, GLCallback update,
+                CPM_GLM_AABB_NS::AABB sceneExtents)
 {
   QApplication a(argc, argv);
-  MainWindow w(init, update);
+  MainWindow w(init, update, sceneExtents);
   w.show();
 
   return a.exec();

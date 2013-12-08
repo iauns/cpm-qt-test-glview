@@ -97,6 +97,7 @@ void update(std::shared_ptr<Spire::Interface> spire,
 
 int main(int argc, char** argv)
 {
-  return CPM_QT_GLVIEW_NS::buildGLView(argc, argv, init, update);
+  CPM_GLM_AABB_NS::AABB sceneExtents(glm::vec3(-1.0), glm::vec3(1.0));
+  return CPM_QT_GLVIEW_NS::buildGLView(argc, argv, init, update, sceneExtents);
 }
 

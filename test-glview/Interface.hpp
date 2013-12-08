@@ -35,6 +35,7 @@
 #include <memory>
 #include <functional>
 #include <spire/Interface.h>
+#include <glm-aabb/AABB.hpp>
 
 namespace CPM_QT_GLVIEW_NS {
 
@@ -50,8 +51,11 @@ typedef std::function<void (std::shared_ptr<CPM_SPIRE_NS::Interface> spire,
 /// issued once when spire is initialized for the first time.
 /// A valid OpenGL context will be current when both 'init' and 'update' are
 /// called.
+/// The scene extents axis aligned bounding box is used to autoview the scene
+/// if the user presses space bar.
 /// Returns error code Qt returns.
-int buildGLView(int argc, char** argv, GLCallback init, GLCallback update);
+int buildGLView(int argc, char** argv, GLCallback init, GLCallback update,
+                CPM_GLM_AABB_NS::AABB sceneExtents = CPM_GLM_AABB_NS::AABB());
 
 } // namespace CPM_QT_GLVIEW_NS
 

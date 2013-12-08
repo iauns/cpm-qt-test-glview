@@ -46,7 +46,7 @@ endif()
 CPM_AddModule("look_at"
   GIT_REPOSITORY "https://github.com/iauns/cpm-arc-look-at"
   GIT_TAG "origin/master"
-  FORWARD_DECLARATION TRUE)
+  EXPORT_MODULE TRUE)
 
 # ++ MODULE: Spire
 CPM_AddModule("spire"
@@ -61,6 +61,13 @@ CPM_AddModule("GLM"
   USE_EXISTING_VER TRUE
   EXPORT_MODULE TRUE    # Use EXPORT_MODULE sparingly. We expose GLM's interface
   )                     # through our own interface hence why we export it.
+
+# ++ MODULE: Axis aligned bounding box
+CPM_AddModule("glm_aabb"
+  GIT_REPOSITORY "https://github.com/iauns/cpm-glm-aabb"
+  GIT_TAG "1.0.1"
+  USE_EXISTING_VER TRUE
+  EXPORT_MODULE TRUE)
 
 CPM_InitModule(${CPM_MODULE_NAME})
 

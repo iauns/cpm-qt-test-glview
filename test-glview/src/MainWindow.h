@@ -35,6 +35,7 @@
 #include <QtGui>
 #include <QMainWindow>
 #include <QDialog>
+#include <glm-aabb/AABB.hpp>
 
 #include "GLWidget.h"
 
@@ -51,7 +52,9 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 
 public:
-  explicit MainWindow(GLCallback init, GLCallback update, QWidget *parent = 0);
+  explicit MainWindow(GLCallback init, GLCallback update,
+                      CPM_GLM_AABB_NS::AABB sceneExtents,
+                      QWidget *parent = 0);
   ~MainWindow();
 
 protected:

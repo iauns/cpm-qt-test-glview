@@ -40,11 +40,14 @@ namespace Spire = CPM_SPIRE_NS;
 namespace CPM_QT_GLVIEW_NS {
 
 //------------------------------------------------------------------------------
-GLWidget::GLWidget(GLCallback init, GLCallback update, const QGLFormat& format) :
+GLWidget::GLWidget(GLCallback init, GLCallback update,
+                   CPM_GLM_AABB_NS::AABB sceneExtents,
+                   const QGLFormat& format) :
     QGLWidget(format),
     mContext(new GLContext(this)),
     mCallbackFunction(update),
-    mArcLookAt(new CPM_LOOK_AT_NS::ArcLookAt)
+    mArcLookAt(new CPM_LOOK_AT_NS::ArcLookAt),
+    mSceneExtents(sceneExtents)
 {
   std::vector<std::string> shaderSearchDirs;
   shaderSearchDirs.push_back("shaders");
@@ -61,6 +64,9 @@ GLWidget::GLWidget(GLCallback init, GLCallback update, const QGLFormat& format) 
 
   // We must disable auto buffer swap on the 'paintEvent'.
   setAutoBufferSwap(false);
+
+  // Ensure that we receive keyboard events.
+  setFocusPolicy(Qt::StrongFocus);
 }
 
 //------------------------------------------------------------------------------
@@ -121,6 +127,19 @@ void GLWidget::updateRenderer()
 }
 
 //------------------------------------------------------------------------------
+void GLWidget::keyPressEvent(QKeyEvent* event)
+{
+  if (event->key() == Qt::Key_Space)
+  {
+    if (mSceneExtents.isNull())
+    {
+      std::cout << "Failure" << std::endl;
+    }
+    mArcLookAt->autoview(mSceneExtents, getDefaultFOVY());
+  }
+}
+
+//------------------------------------------------------------------------------
 glm::vec2 GLWidget::calculateScreenSpaceCoords(const glm::ivec2& mousePos)
 {
   float windowOriginX = 0.0f;
@@ -162,7 +181,7 @@ void GLWidget::mouseReleaseEvent(QMouseEvent*)
 //------------------------------------------------------------------------------
 void GLWidget::wheelEvent(QWheelEvent* event)
 {
-  mArcLookAt->doZoom(static_cast<float>(event->delta()) / 100.0f);
+  mArcLookAt->doZoom(-static_cast<float>(event->delta()) / 100.0f);
 }
 
 } // namespace CPM_QT_GLVIEW_NS

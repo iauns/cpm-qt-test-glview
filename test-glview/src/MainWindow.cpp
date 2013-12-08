@@ -33,7 +33,9 @@
 
 namespace CPM_QT_GLVIEW_NS {
 
-MainWindow::MainWindow(GLCallback init, GLCallback update, QWidget *parent) :
+MainWindow::MainWindow(GLCallback init, GLCallback update,
+                       CPM_GLM_AABB_NS::AABB sceneExtents,
+                       QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
@@ -43,7 +45,7 @@ MainWindow::MainWindow(GLCallback init, GLCallback update, QWidget *parent) :
   QGLFormat fmt;
   fmt.setAlpha(true);
   fmt.setRgba(true);
-  mGLWidget = new GLWidget(init, update, fmt);
+  mGLWidget = new GLWidget(init, update, sceneExtents, fmt);
 
   setCentralWidget(mGLWidget);
 }
