@@ -45,7 +45,7 @@ endif()
 # ++ MODULE: Arc ball look-at camera
 CPM_AddModule("look_at"
   GIT_REPOSITORY "https://github.com/iauns/cpm-arc-look-at"
-  GIT_TAG "origin/master"
+  GIT_TAG "1.0.0"
   EXPORT_MODULE TRUE)
 
 # ++ MODULE: Spire
